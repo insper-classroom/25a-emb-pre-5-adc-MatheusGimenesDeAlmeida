@@ -24,16 +24,30 @@ void data_task(void *p) {
 }
 
 void process_task(void *p) {
+    int buffer[5] = {0}; // guarda as 5 últimas amostras
+    int index = 0;
+    int count = 0;
+
     int data = 0;
 
     while (true) {
         if (xQueueReceive(xQueueData, &data, 100)) {
-            // implementar filtro aqui!
+            buffer[index] = data;
+            index = (index + 1) % 5;
 
+            if (count < 5) count++;
 
+            // calcula média apenas quando tiver 5 amostras
+            if (count == 5) {
+                int sum = 0;
+                for (int i = 0; i < 5; i++) {
+                    sum += buffer[i];
+                }
+                int media = sum / 5;
+                printf("Média móvel: %d\n", media);
+            }
 
-
-            // deixar esse delay!
+            // manter esse delay!
             vTaskDelay(pdMS_TO_TICKS(50));
         }
     }
