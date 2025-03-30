@@ -44,7 +44,7 @@ void process_task(void *p) {
                     sum += buffer[i];
                 }
                 int media = sum / 5;
-                printf("Média móvel: %d\n", media);
+                printf("%d\n", media);
             }
 
             // manter esse delay!
