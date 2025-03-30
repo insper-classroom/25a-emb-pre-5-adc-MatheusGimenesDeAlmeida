@@ -24,34 +24,40 @@ void data_task(void *p) {
 }
 
 void process_task(void *p) {
-    int buffer[5] = {0}; // guarda as 5 últimas amostras
-    int index = 0;
-    int count = 0;
+    int janela[5] = {0};   // guarda as últimas 5 amostras
+    int pos = 0;           // posição atual no vetor circular
+    int count = 0;         // conta quantas amostras já foram lidas
 
-    int data = 0;
+    int nova_amostra = 0;
 
     while (true) {
-        if (xQueueReceive(xQueueData, &data, 100)) {
-            buffer[index] = data;
-            index = (index + 1) % 5;
+        // tenta receber uma nova amostra da fila (timeout de 100 ticks)
+        if (xQueueReceive(xQueueData, &nova_amostra, pdMS_TO_TICKS(100))) {
+            // adiciona a nova amostra na posição atual da janela
+            janela[pos] = nova_amostra;
 
+            // avança a posição (circular: 0 → 1 → ... → 4 → 0 ...)
+            pos = (pos + 1) % 5;
+
+            // aumenta a contagem de amostras, até no máximo 5
             if (count < 5) count++;
 
-            // calcula média apenas quando tiver 5 amostras
+            // só calcula a média se já tivermos 5 amostras
             if (count == 5) {
-                int sum = 0;
+                int soma = 0;
                 for (int i = 0; i < 5; i++) {
-                    sum += buffer[i];
+                    soma += janela[i];
                 }
-                int media = sum / 5;
-                printf("%d\n", media);
+                int media = soma / 5;
+                printf("%d\n", media); // imprime só a média
             }
 
-            // manter esse delay!
+            // manter esse delay
             vTaskDelay(pdMS_TO_TICKS(50));
         }
     }
 }
+
 
 int main() {
     stdio_init_all();
